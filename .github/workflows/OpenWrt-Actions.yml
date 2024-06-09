@@ -41,7 +41,7 @@ env:
   WECHAT_WORK_TOKEN: ${{ secrets.WECHAT_WORK_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-  GITHUB_RELEASE: https://github.com/db-one/OpenWrt-AutoBuild/releases
+  GITHUB_RELEASE: https://github.com/shidahuilang/OpenWrt-AutoBuild/releases
 
 jobs: 
   build:
