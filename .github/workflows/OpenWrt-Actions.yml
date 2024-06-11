@@ -82,7 +82,8 @@ jobs:
         #添加变量
         echo "HOME=${GITHUB_WORKSPACE}/openwrt" >> $GITHUB_ENV
         echo "WORKPATH=${GITHUB_WORKSPACE}/openwrt/build/${{matrix.target}}" >> $GITHUB_ENV
-
+        echo "DOCKERTAG=${{ secrets.DOCKER_ID }}/openwrt:latest" >> $GITHUB_ENV
+        
     - name: 初始化系统环境
       env:
         DEBIAN_FRONTEND: noninteractive
