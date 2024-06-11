@@ -278,19 +278,14 @@ jobs:
       id: organizer
       run: |
         mkdir -p ./artifact/firmware
-        mkdir -p ./artifact/pvekvm
-        mkdir -p ./artifact/hyperv
-        mkdir -p ./artifact/vmware
+
         mkdir -p ./artifact/package
-        mkdir -p ./artifact/buildinfo
+
         cp -rf openwrt/.config ./artifact/buildinfo/${{matrix.target}}.config
         rm -rf $(find openwrt/bin/targets/ -type d -name "packages")
         cp -rf $(find openwrt/bin/packages/ -type f -name "*.ipk") ./artifact/package/
         cp -rf $(find openwrt/bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/
         cp -rf $(find openwrt/bin/targets/ -type f -name "*combined*img*") ./artifact/firmware/
-        cp -rf $(find openwrt/bin/targets/ -type f -name "*combined*qcow2*") ./artifact/pvekvm/ || true
-        cp -rf $(find openwrt/bin/targets/ -type f -name "*combined*vhdx*") ./artifact/hyperv/ || true
-        cp -rf $(find openwrt/bin/targets/ -type f -name "*combined*vmdk*") ./artifact/vmware/ || true
         echo "编译完成时间..."
         START_SECONDS=${{ env.START_SECONDS }}
         END_TIME=`date +'%Y-%m-%d %H:%M:%S'`
@@ -306,26 +301,31 @@ jobs:
         name: OpenWrt_firmware_${{matrix.target}}_${{ env.FILE_TIME }}
         path: ./artifact/firmware/
 
-    - name: 上传PVE/KVM镜像文件
-      if: steps.compile.outcome == 'success' && env.UPLOAD_QCOW2 == 'true'
-      uses: actions/upload-artifact@main
-      with:
-        name: OpenWrt_pvekvm_${{matrix.target}}_${{ env.FILE_TIME }}
-        path: ./artifact/pvekvm/
 
-    - name: 上传Hyper-V镜像文件
-      if: steps.compile.outcome == 'success' && env.UPLOAD_VHDX == 'true'
-      uses: actions/upload-artifact@main
-      with:
-        name: OpenWrt_hyperv_${{matrix.target}}_${{ env.FILE_TIME }}
-        path: ./artifact/hyperv/
+    - name: 设置 Docker Buildx
+      uses: docker/setup-buildx-action@master
+      if: env.DOCKER_ID && env.DOCKER_PASSWD
 
-    - name: 上传VMware镜像文件
-      if: steps.compile.outcome == 'success' && env.UPLOAD_VMDK == 'true'
-      uses: actions/upload-artifact@main
+    - name: 登录 DockerHub
+      uses: docker/login-action@master
+      if: env.DOCKER_ID && env.DOCKER_PASSWD
       with:
-        name: OpenWrt_vmware_${{matrix.target}}_${{ env.FILE_TIME }}
-        path: ./artifact/vmware/
+        username: ${{ secrets.DOCKER_ID }}
+        password: ${{ secrets.DOCKER_PASSWD }}
+        
+    - name: 构建并推送 Docker 镜像
+      uses: docker/build-push-action@master
+      continue-on-error: true
+      if: env.DOCKER_ID && env.DOCKER_PASSWD && ! contains(github.event.action, 'noser')
+      with:
+        platforms: ${{ env.ARCH }}
+        file: Dockerfile
+        context: .
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_ID }}/openwrt:${{matrix.target}}
+          ${{ env.DOCKERTAG }}  
+          
 
     - name: 上传插件包文件
       if: steps.compile.outcome == 'success' && env.UPLOAD_IPK == 'true'
