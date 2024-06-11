@@ -254,7 +254,7 @@ CONFIG_PACKAGE_snmpd=y
 # CONFIG_PACKAGE_wol is not set
 # CONFIG_PACKAGE_xray-core is not set
 
-
+EOF
 
 
 
