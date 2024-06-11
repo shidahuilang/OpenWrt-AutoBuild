@@ -35,7 +35,7 @@ else
 fi
 
 #
-sed -i 's#192.168.1.1#10.0.0.1#g' $NET                                                    # 定制默认IP
+sed -i 's#192.168.1.1#192.168.2.1#g' $NET                                                    # 定制默认IP
 # sed -i 's#OpenWrt#OpenWrt-X86#g' $NET                                                     # 修改默认名称为OpenWrt-X86
 sed -i 's@.*CYXluq4wUazHjmCDBCqXF*@#&@g' $ZZZ                                             # 取消系统默认密码
 sed -i "s/OpenWrt /ONE build $(TZ=UTC-8 date "+%Y.%m.%d") @ OpenWrt /g" $ZZZ              # 增加自己个性名称
